@@ -1,0 +1,14 @@
+# This scoring matrix targets alignments with the following properties.
+# Percent identity: 92.1563
+# Percent A+T: 78.935
+# Ratio of transitions to transversions: 0.332553
+# Ratio of transition rate to transversion rate (alpha/beta): 1
+# Expected number of transitions per site: 0.0208262
+# Expected number of transversions per site: 0.0626253
+# Expected number of substitutions per site: 0.0834515
+# Scale parameter (lambda): 0.427882
+   a  c  g  t
+a  2 -5 -5 -5
+c -5  5 -5 -5
+g -5 -5  5 -5
+t -5 -5 -5  2
