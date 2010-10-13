@@ -11,13 +11,15 @@
 #include "mcf_util.hh"
 #include "tantan.hh"
 
-#include <algorithm>  // fill_n
+#include <algorithm>  // copy, fill_n
 #include <cassert>
 #include <cmath>
 #include <cstring>  // strchr
 #include <cstdlib>  // EXIT_SUCCESS, EXIT_FAILURE
+#include <exception>  // exception
 #include <fstream>
 #include <iostream>
+#include <new>  // bad_alloc
 
 #define BEG(v) ((v).empty() ? 0 : &(v).front())
 #define END(v) ((v).empty() ? 0 : &(v).back() + 1)
@@ -149,7 +151,7 @@ void processOneSequence(FastaSequence &f, std::ostream &output) {
                              options.repeatOffsetProbDecay,
                              firstGapProb, otherGapProb,
                              BEG(transitionCounts));
-    double sequenceLength = static_cast<double>(end - beg);
+    double sequenceLength = static_cast<double>(f.sequence.size());
     transitionTotal += sequenceLength + 1;
   }
 }
