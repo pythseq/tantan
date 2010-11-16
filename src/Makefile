@@ -1,4 +1,4 @@
-CXXFLAGS = -O3 -Wall -W -Wcast-qual -Wwrite-strings -Wsign-promo	\
+CXXFLAGS = -O3 -Wall -W -Wcast-qual -Wswitch-enum -Wundef	\
 -Wcast-align -Wold-style-cast
 # -Wconversion
 

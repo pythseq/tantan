@@ -83,9 +83,9 @@ tantan is distributed under the GNU General Public License, either
 version 3 of the License, or (at your option) any later version.  For
 details, see COPYING.txt.
 
-If you use tantan in your research, please cite our published article
-(which is still in preparation, so in the meantime please cite the
-website).
+If you use tantan in your research, please cite:
+"A new repeat-masking method enables specific detection of homologous
+sequences", MC Frith, Nucleic Acids Research (in press).
 
 tantan's website is: http://www.cbrc.jp/tantan/
 

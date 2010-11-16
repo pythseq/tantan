@@ -43,10 +43,6 @@ std::istream &operator>>(std::istream &s, TantanOptions::OutputType &x) {
   return s;
 }
 
-std::ostream &operator<<(std::ostream &s, const TantanOptions::OutputType &x) {
-  return s << static_cast<int>(x);
-}
-
 TantanOptions::TantanOptions() :
     isProtein(false),
     maskSymbol(0),

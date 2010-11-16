@@ -8,6 +8,11 @@
 
 namespace mcf {
 
+// consts have internal linkage, apparently.
+// If I make these into static const class members, g++ 4.0.1 complains.
+const uchar defaultNumber = 255;
+const uchar defaultLetter = '!';
+
 const char* Alphabet::dna = "ACGT";
 
 // U=selenocysteine, O=pyrrolysine, *=stop?

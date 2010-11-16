@@ -20,8 +20,6 @@ struct Alphabet {
   static const char* protein;
 
   static const unsigned capacity = 256;
-  static const unsigned defaultNumber = capacity - 1;
-  static const unsigned defaultLetter = '!';
 
   // Initializes the Alphabet with the given normal letters.
   void fromString(const std::string &normalLetters);  // case is preserved
