@@ -7,6 +7,10 @@ Introduction
 tantan is a tool for masking simple regions (low complexity and
 short-period tandem repeats) in biological sequences.
 
+The aim of tantan is to prevent false predictions when searching for
+homologous regions between two sequences.  Simple repeats often align
+strongly to each other, causing false homology predictions.
+
 Setup
 -----
 
@@ -22,6 +26,8 @@ Usage
     tantan ntseqs.fa > masked.fa
 
   This will put the masked sequences in a new file called "masked.fa".
+  (tantan also works on FASTQ-format, though it does not use the
+  quality data.)
 
 * To mask proteins, you need to use the "-p" option:
 
@@ -55,8 +61,33 @@ Usage
     tantan -m atMask.mat -r 0.01 atrich.fa > masked.fa
 
 The preceding examples cover all of tantan's options that you should
-ever need.  The algorithm has additional parameters that are listed in
-the next section for completeness.
+ever need.
+
+Recommendations for homology search
+-----------------------------------
+
+1) Mask *both* (sets of) sequences.
+
+2) If for some reason you wish to mask only one (set of) sequence(s),
+   increase "-r" to 0.02 (0.05 for AT-rich DNA).
+
+3) For DNA-versus-protein alignment, increase "-r" for the proteins to
+   0.02.  If for some reason you mask only one (set of) sequence(s),
+   make sure it's the proteins.
+
+4) If you merely wish to find homologs, "hard masking" works well.
+   Hard masking means replacing masked letters with a dummy letter,
+   typically N for DNA and X for proteins.  Alternatively, some
+   alignment tools have options to treat lowercase as hard-masked.
+
+5) If you also wish to align the homologs, "soft masking" is
+   attractive.  Soft-masking means that lowercase is treated as masked
+   in earlier stages of the alignment algorithm but not later stages.
+   However, it is important that the masking be lifted only *after*
+   homology has been decided.  Most alignment tools cannot do this
+   properly; FASTA and LAST can.
+
+For more information, please read the tantan publication (see below).
 
 Options
 -------
@@ -75,6 +106,27 @@ Options
 -f  output type: 0=masked sequence, 1=repeat probabilities, 2=repeat counts
 -h, --help  show help message, then exit
 --version   show version information, then exit
+
+Advanced issues
+---------------
+
+When tantan masks tandem repeats, it tends to leave the first
+(left-most) repeat unit unmasked.  This sometimes allows us to find
+homologs we would otherwise miss:
+
+  TGCAAGCTA TTAGGCTTAGGTCAGTGC ttaagcttaggtcagtgc AACATA
+  ||| ||| | |||||||||||||||||| ||| |||||||||||||| ||| ||
+  TGCTAGCAA TTAGGCTTAGGTCAGTGC ttaggcttaggtcagtgc AACGTA
+
+However, there is a danger of non-equivalent repeat units being
+unmasked.  This happens especially if we mask DNA on one strand but
+align it on the other strand:
+
+                     TGCAAGCTA TTAGGCTTAGGTCAGTGC ttaagcttaggtcagtgc AACATA
+                               ||||||||||||||||||
+  TGCTAGCAA ttaggcttaggtcagtgc TTAGGCTTAGGTCAGTGC AACGTA
+
+(My thanks to Junko Tsuji and Paul Horton for finding these issues.)
 
 Miscellaneous
 -------------

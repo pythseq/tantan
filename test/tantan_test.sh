@@ -23,5 +23,7 @@ countLowercaseLetters () {
     tantan -m atMask.mat -r.01 hg19_chrM.fa | countLowercaseLetters
     echo
     tantan -p -a11 -b2 titin_human.fa | countLowercaseLetters
+    echo
+    tantan panda.fastq
 } |
 diff tantan_test.out -

@@ -1,4 +1,4 @@
-// Copyright 2010 Martin C. Frith
+// Copyright 2010, 2011 Martin C. Frith
 
 #ifndef MCF_FASTA_SEQUENCE_HH
 #define MCF_FASTA_SEQUENCE_HH
@@ -14,6 +14,10 @@ typedef unsigned char uchar;
 struct FastaSequence {
   std::string title;
   std::vector<uchar> sequence;
+
+  // Used for fastq:
+  std::string secondTitle;
+  std::vector<uchar> qualityCodes;
 };
 
 std::istream &operator>>(std::istream &s, FastaSequence &f);
