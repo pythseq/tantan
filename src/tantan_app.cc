@@ -117,6 +117,33 @@ void initMaskTable() {
   else                 maskTable = hardMaskTable;
 }
 
+std::string firstWord(const std::string &s) {
+  std::string word;
+  std::istringstream iss(s);
+  iss >> word;
+  return word;  // might be empty
+}
+
+void writeBedLine(const std::string &seqName, const float *origin,
+                  const float *beg, const float *end, std::ostream &out) {
+  out << seqName << '\t' << (beg - origin) << '\t' << (end - origin) << '\n';
+}
+
+void writeBed(const float *probBeg, const float *probEnd,
+              const std::string &seqName, std::ostream &output) {
+  if (seqName.empty()) throw Error("missing sequence name");
+  const float *maskBeg = 0;  // pointer to start of masked tract
+  for (const float *i = probBeg; i < probEnd; ++i) {
+    if (*i >= options.minMaskProb) {  // this position is masked
+      if (maskBeg == 0) maskBeg = i;
+    } else {  // this position is not masked
+      if (maskBeg) writeBedLine(seqName, probBeg, maskBeg, i, output);
+      maskBeg = 0;
+    }
+  }
+  if (maskBeg) writeBedLine(seqName, probBeg, maskBeg, probEnd, output);
+}
+
 void processOneSequence(FastaSequence &f, std::ostream &output) {
   uchar *beg = BEG(f.sequence);
   uchar *end = END(f.sequence);
@@ -132,19 +159,7 @@ void processOneSequence(FastaSequence &f, std::ostream &output) {
                           options.minMaskProb, maskTable);
     alphabet.decodeInPlace(beg, end);
     output << f;
-  } else if(options.outputType == options.probOut) {
-    std::vector<float> probabilities(end - beg);
-    float *probBeg = BEG(probabilities);
-    float *probEnd = END(probabilities);
-    tantan::getProbabilities(beg, end, options.maxCycleLength,
-                             probMatrixPointers,
-                             options.repeatProb, options.repeatEndProb,
-                             options.repeatOffsetProbDecay,
-                             firstGapProb, otherGapProb, probBeg);
-    output << '>' << f.title << '\n';
-    for (float *i = probBeg; i < probEnd; ++i)
-      output << *i << '\n';
-  } else {
+  } else if (options.outputType == options.countOut) {
     tantan::countTransitions(beg, end, options.maxCycleLength,
                              probMatrixPointers,
                              options.repeatProb, options.repeatEndProb,
@@ -153,6 +168,22 @@ void processOneSequence(FastaSequence &f, std::ostream &output) {
                              BEG(transitionCounts));
     double sequenceLength = static_cast<double>(f.sequence.size());
     transitionTotal += sequenceLength + 1;
+  } else {
+    std::vector<float> probabilities(end - beg);
+    float *probBeg = BEG(probabilities);
+    float *probEnd = END(probabilities);
+    tantan::getProbabilities(beg, end, options.maxCycleLength,
+                             probMatrixPointers,
+                             options.repeatProb, options.repeatEndProb,
+                             options.repeatOffsetProbDecay,
+                             firstGapProb, otherGapProb, probBeg);
+    if (options.outputType == options.probOut) {
+      output << '>' << f.title << '\n';
+      for (float *i = probBeg; i < probEnd; ++i)
+        output << *i << '\n';
+    } else {
+      writeBed(probBeg, probEnd, firstWord(f.title), output);
+    }
   }
 }
 

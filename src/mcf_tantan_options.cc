@@ -36,7 +36,7 @@ static int myGetopt(int argc, char **argv, const char *optstring,
 std::istream &operator>>(std::istream &s, TantanOptions::OutputType &x) {
   int i = 0;
   s >> i;
-  if (i < 0 || i > 2)
+  if (i < 0 || i > 3)
     s.setstate(std::ios::failbit);
   if (s)
     x = static_cast<TantanOptions::OutputType>(i);
@@ -80,7 +80,8 @@ Options (default settings):\n\
  -b  gap extension cost (infinite: no gaps)\n\
  -s  minimum repeat probability for masking ("
       + stringify(minMaskProb) + ")\n\
- -f  output type: 0=masked sequence, 1=repeat probabilities, 2=repeat counts ("
+ -f  output type: 0=masked sequence, 1=repeat probabilities,\n\
+                  2=repeat counts, 3=BED ("
       + stringify(outputType) + ")\n\
  -h, --help  show help message, then exit\n\
  --version   show version information, then exit\n\

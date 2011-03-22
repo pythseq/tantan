@@ -21,17 +21,23 @@ Usage
 -----
 
 * Suppose you have some nucleotide sequences (DNA or RNA) in a
-  FASTA-format file called "ntseqs.fa".  You can mask them like this:
+  FASTA-format file called "ntseqs.fa".  You can identify simple
+  repeats like this:
 
     tantan ntseqs.fa > masked.fa
 
-  This will put the masked sequences in a new file called "masked.fa".
-  (tantan also works on FASTQ-format, though it does not use the
-  quality data.)
+  This will create a new FASTA file called "masked.fa" that replaces
+  all masked regions with lowercase letters.  (tantan also works on
+  FASTQ-format, though it does not use the quality data.)
 
-* To mask proteins, you need to use the "-p" option:
+* To mask proteins effectively, tantan needs to use different
+  algorithm parameters than for nucleotides.  You have to tell it when
+  you have proteins, using the "-p" option:
 
     tantan -p aaseqs.fa > masked.fa
+
+  If you omit "-p" and the sequences look proteinaceous, tantan will
+  print a warning message.
 
 * By default, tantan indicates repetitive regions with lowercase
   letters.  You can make it replace repetitive letters with (say) "N"
@@ -103,7 +109,8 @@ Options
 -a  gap existence cost
 -b  gap extension cost
 -s  minimum repeat probability for masking
--f  output type: 0=masked sequence, 1=repeat probabilities, 2=repeat counts
+-f  output type: 0=masked sequence, 1=repeat probabilities,
+                 2=repeat counts, 3=BED
 -h, --help  show help message, then exit
 --version   show version information, then exit
 
