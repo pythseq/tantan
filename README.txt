@@ -81,17 +81,12 @@ Recommendations for homology search
    0.02.  If for some reason you mask only one (set of) sequence(s),
    make sure it's the proteins.
 
-4) If you merely wish to find homologs, "hard masking" works well.
-   Hard masking means replacing masked letters with a dummy letter,
-   typically N for DNA and X for proteins.  Alternatively, some
-   alignment tools have options to treat lowercase as hard-masked.
-
-5) If you also wish to align the homologs, "soft masking" is
-   attractive.  Soft-masking means that lowercase is treated as masked
-   in earlier stages of the alignment algorithm but not later stages.
-   However, it is important that the masking be lifted only *after*
-   homology has been decided.  Most alignment tools cannot do this
-   properly; FASTA and LAST can.
+4) Some alignment tools exclude lowercase from their initial seeding
+   phase, but treat lowercase identically to uppercase during their
+   subsequent extension phase.  Unfortunately, this does not reliably
+   prevent false homology predictions.  It is OK to re-align without
+   masking after homology has been decided: FASTA and LAST can do
+   this.
 
 For more information, please read the tantan publication (see below).
 
@@ -144,7 +139,7 @@ details, see COPYING.txt.
 
 If you use tantan in your research, please cite:
 "A new repeat-masking method enables specific detection of homologous
-sequences", MC Frith, Nucleic Acids Research (in press).
+sequences", MC Frith, Nucleic Acids Research 2011 39(4):e23.
 
 tantan's website is: http://www.cbrc.jp/tantan/
 
