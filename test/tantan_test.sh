@@ -3,7 +3,9 @@
 # Run tantan with various inputs and check the outputs.
 
 cd $(dirname $0)
-PATH=$PATH:../src
+
+# Make sure we use this version of tantan:
+PATH=../src:$PATH
 
 countLowercaseLetters () {
     grep -v '^>' "$@" | tr -cd a-z | wc -c
