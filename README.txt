@@ -22,7 +22,7 @@ Usage
 
 * Suppose you have some nucleotide sequences (DNA or RNA) in a
   FASTA-format file called "ntseqs.fa".  You can identify simple
-  repeats like this:
+  repeats like this::
 
     tantan ntseqs.fa > masked.fa
 
@@ -32,7 +32,7 @@ Usage
 
 * To mask proteins effectively, tantan needs to use different
   algorithm parameters than for nucleotides.  You have to tell it when
-  you have proteins, using the "-p" option:
+  you have proteins, using the "-p" option::
 
     tantan -p aaseqs.fa > masked.fa
 
@@ -41,28 +41,28 @@ Usage
 
 * By default, tantan indicates repetitive regions with lowercase
   letters.  You can make it replace repetitive letters with (say) "N"
-  by using the "-x" option:
+  by using the "-x" option::
 
     tantan -x N ntseqs.fa > masked.fa
 
 * By default, tantan does not preserve lowercase letters in the input
   sequences.  You can tell it to preserve them by using the "-c"
   option.  So the output will have the union of the lowercase in the
-  input and the lowercase assigned by tantan:
+  input and the lowercase assigned by tantan::
 
     tantan -c ntseqs.fa > masked.fa
 
 * tantan's masking rate is usually OK, but you can alter it by
   changing the "-r" parameter from its default value of 0.005.  Higher
   values increase the amount of masking, and lower values decrease it.
-  This increases the masking rate:
+  This increases the masking rate::
 
     tantan -r 0.02 ntseqs.fa > masked.fa
 
 * Finally, to mask extremely AT-rich DNA, you should change tantan's
   scoring matrix.  The "test" directory contains a matrix "atMask.mat"
   that works well for DNA with ~80% A+T, such as Plasmodium and
-  Dictyostelium genomes.  We recommend masking such DNA like this:
+  Dictyostelium genomes.  We recommend masking such DNA like this::
 
     tantan -m atMask.mat -r 0.01 atrich.fa > masked.fa
 
@@ -114,7 +114,7 @@ Advanced issues
 
 When tantan masks tandem repeats, it tends to leave the first
 (left-most) repeat unit unmasked.  This sometimes allows us to find
-homologs we would otherwise miss:
+homologs we would otherwise miss::
 
   TGCAAGCTA TTAGGCTTAGGTCAGTGC ttaagcttaggtcagtgc AACATA
   ||| ||| | |||||||||||||||||| ||| |||||||||||||| ||| ||
@@ -122,7 +122,7 @@ homologs we would otherwise miss:
 
 However, there is a danger of non-equivalent repeat units being
 unmasked.  This happens especially if we mask DNA on one strand but
-align it on the other strand:
+align it on the other strand::
 
                      TGCAAGCTA TTAGGCTTAGGTCAGTGC ttaagcttaggtcagtgc AACATA
                                ||||||||||||||||||
