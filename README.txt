@@ -14,8 +14,13 @@ strongly to each other, causing false homology predictions.
 Setup
 -----
 
-Using the command line, go into tantan's "src" directory and type
-"make".  This assumes you have a C++ compiler.
+Using the command line, go into the tantan directory.  To install it
+into your personal "bin" directory, type::
+
+  make install bindir=~/bin
+
+This assumes you have a C++ compiler.  To compile tantan without
+installing it anywhere, just type "make".
 
 Usage
 -----
