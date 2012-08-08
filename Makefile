@@ -21,5 +21,5 @@ log:
 distdir = tantan-`hg id -n`
 dist: README.html log
 	@cd src && ${MAKE} version.hh
-	rsync -rC --exclude tantan src test Makefile *.txt *.html ${distdir}
+	rsync -rC --exclude tantan src test Makefile *.txt README.html ${distdir}
 	zip -qrm ${distdir} ${distdir}
