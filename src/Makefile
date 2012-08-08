@@ -8,7 +8,7 @@ COBJ = CA_code/lambda_calculator.o
 
 all: tantan
 
-tantan: *.cc *.hh Makefile $(COBJ)
+tantan: *.cc *.hh version.hh Makefile $(COBJ)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@ *.cc $(COBJ)
 
 $(COBJ): CA_code/*.c CA_code/*.h Makefile
@@ -16,3 +16,12 @@ $(COBJ): CA_code/*.c CA_code/*.h Makefile
 
 clean:
 	rm -f tantan $(COBJ)
+
+VERSION = \"`hg id -n`\"
+
+version.hh: FORCE
+	if test -e ../.hg; \
+	then echo $(VERSION) | cmp -s $@ - || echo $(VERSION) > $@ ; \
+	fi
+
+FORCE:
