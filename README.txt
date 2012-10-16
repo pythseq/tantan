@@ -14,16 +14,30 @@ strongly to each other, causing false homology predictions.
 Setup
 -----
 
-Using the command line, go into the tantan directory.  To install it
-into your personal "bin" directory, type::
+You need to have a C++ compiler.  On Linux, you might need to install
+a package called "g++".  On Mac, you might need to install
+command-line developer tools.  On Windows, you might need to install
+Cygwin.
 
-  make install bindir=~/bin
+Using the command line, go into the tantan directory.  To compile it,
+type::
 
-This assumes you have a C++ compiler.  To compile tantan without
-installing it anywhere, just type "make".
+  make
 
-Usage
------
+Optionally, copy tantan to a standard "bin" directory (using "sudo" to
+request administrator permissions)::
+
+  sudo make install
+
+Or copy it to your personal bin directory::
+
+  make install prefix=~
+
+You might need to log out and back in for your computer to recognize
+the new program.
+
+Normal usage
+------------
 
 * Suppose you have some nucleotide sequences (DNA or RNA) in a
   FASTA-format file called "ntseqs.fa".  You can identify simple
@@ -43,6 +57,9 @@ Usage
 
   If you omit "-p" and the sequences look proteinaceous, tantan will
   print a warning message.
+
+Advanced usage
+--------------
 
 * By default, tantan indicates repetitive regions with lowercase
   letters.  You can make it replace repetitive letters with (say) "N"
@@ -94,6 +111,24 @@ Recommendations for homology search
    this.
 
 For more information, please read the tantan publication (see below).
+
+FAQ
+---
+
+Why does tantan sometimes mask isolated bases?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This happens when a region is borderline repetitive, and a single base
+creeps just over the threshold.  Don't worry about it, it's not a
+problem (at least for tantan's aim of preventing false homology).
+
+Does tantan mask functional sequence?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Of course.  Proteins and protein-coding exons can contain simple
+repeats.  Repeats can be functional.  If we want to avoid false
+homology we have to mask them.  Remember that tantan merely lowercases
+repeats, so it's easy to lift the masking after determining homology.
 
 Options
 -------
