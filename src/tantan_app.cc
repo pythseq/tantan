@@ -6,10 +6,10 @@
 #include "mcf_alphabet.hh"
 #include "mcf_fasta_sequence.hh"
 #include "mcf_score_matrix.hh"
-#include "mcf_score_matrix_probs.hh"
 #include "mcf_tantan_options.hh"
 #include "mcf_util.hh"
 #include "tantan.hh"
+#include "LambdaCalculator.hh"
 
 #include <algorithm>  // copy, fill_n
 #include <cassert>
@@ -85,20 +85,22 @@ void initScoresAndProbabilities() {
                              alphabet.lettersToNumbers,
                              scoreMatrix.minScore(), false);
 
-  ScoreMatrixProbs smp(fastMatrixPointers, alphabet.size);
-  if (smp.isBad())
+  cbrc::LambdaCalculator matCalc;
+  matCalc.calculate(fastMatrixPointers, alphabet.size);
+  if (matCalc.isBad())
     throw Error("can't calculate probabilities for this score matrix");
+  double matrixLambda = matCalc.lambda();
 
   for (int i = 0; i < scoreMatrixSize; ++i) {
     for (int j = 0; j < scoreMatrixSize; ++j) {
-      probMatrix[i][j] = std::exp(smp.lambda() * fastMatrix[i][j]);
+      probMatrix[i][j] = std::exp(matrixLambda * fastMatrix[i][j]);
     }
   }
 
   if (options.gapExtensionCost > 0) {
     int firstGapCost = options.gapExistenceCost + options.gapExtensionCost;
-    firstGapProb = std::exp(-smp.lambda() * firstGapCost);
-    otherGapProb = std::exp(-smp.lambda() * options.gapExtensionCost);
+    firstGapProb = std::exp(-matrixLambda * firstGapCost);
+    otherGapProb = std::exp(-matrixLambda * options.gapExtensionCost);
 
     // the gap existence cost includes the gap ending cost:
     firstGapProb /= (1 - otherGapProb);
@@ -106,7 +108,7 @@ void initScoresAndProbabilities() {
     // XXX check if firstGapProb is too high
   }
 
-  //std::cerr << "lambda: " << smp.lambda() << "\n";
+  //std::cerr << "lambda: " << matrixLambda << "\n";
   //std::cerr << "firstGapProb: " << firstGapProb << "\n";
   //std::cerr << "otherGapProb: " << otherGapProb << "\n";
 }
