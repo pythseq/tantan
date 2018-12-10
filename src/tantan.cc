@@ -99,7 +99,7 @@ struct Tantan {
     //f2g = firstGapProb;
     //g2f = 1 - otherGapProb;
     oneGapProb = firstGapProb * (1 - otherGapProb);
-    endGapProb = firstGapProb * 1;
+    endGapProb = firstGapProb * (maxRepeatOffset > 1);
     f2f0 = 1 - repeatEndProb;
     f2f1 = 1 - repeatEndProb - firstGapProb;
     f2f2 = 1 - repeatEndProb - firstGapProb * 2;
@@ -148,33 +148,29 @@ struct Tantan {
     double f = *foregroundPtr;
     double fromForeground = f;
 
-    if (insertionProbs.empty()) {
-      *foregroundPtr = fromBackground + f * f2f0;
-    } else {
-      double *insertionPtr = &insertionProbs.back();
-      double i = *insertionPtr;
-      *foregroundPtr = fromBackground + f * f2f1 + i * endGapProb;
-      double d = f;
-      --foregroundPtr;
-      fromBackground *= b2fGrowth;
+    double *insertionPtr = &insertionProbs.back();
+    double i = *insertionPtr;
+    *foregroundPtr = fromBackground + f * f2f1 + i * endGapProb;
+    double d = f;
+    --foregroundPtr;
+    fromBackground *= b2fGrowth;
 
-      while (foregroundPtr > &foregroundProbs.front()) {
-        f = *foregroundPtr;
-        fromForeground += f;
-        i = *(insertionPtr - 1);
-        *foregroundPtr = fromBackground + f * f2f2 + (i + d) * oneGapProb;
-        *insertionPtr = f + i * g2g;
-        d = f + d * g2g;
-        --foregroundPtr;
-        --insertionPtr;
-        fromBackground *= b2fGrowth;
-      }
-
+    while (foregroundPtr > &foregroundProbs.front()) {
       f = *foregroundPtr;
       fromForeground += f;
-      *foregroundPtr = fromBackground + f * f2f1 + d * endGapProb;
-      *insertionPtr = f;
+      i = *(insertionPtr - 1);
+      *foregroundPtr = fromBackground + f * f2f2 + (i + d) * oneGapProb;
+      *insertionPtr = f + i * g2g;
+      d = f + d * g2g;
+      --foregroundPtr;
+      --insertionPtr;
+      fromBackground *= b2fGrowth;
     }
+
+    f = *foregroundPtr;
+    fromForeground += f;
+    *foregroundPtr = fromBackground + f * f2f1 + d * endGapProb;
+    *insertionPtr = f;
 
     fromForeground *= f2b;
     backgroundProb = backgroundProb * b2b + fromForeground;
@@ -186,34 +182,30 @@ struct Tantan {
     double f = *foregroundPtr;
     double toForeground = f;
 
-    if (insertionProbs.empty()) {
-      *foregroundPtr = toBackground + f2f0 * f;
-    } else {
-      double *insertionPtr = &insertionProbs.front();
-      double i = *insertionPtr;
-      *foregroundPtr = toBackground + f2f1 * f + i;
-      double d = endGapProb * f;
-      ++foregroundPtr;
-      toForeground *= b2fGrowth;
+    double *insertionPtr = &insertionProbs.front();
+    double i = *insertionPtr;
+    *foregroundPtr = toBackground + f2f1 * f + i;
+    double d = endGapProb * f;
+    ++foregroundPtr;
+    toForeground *= b2fGrowth;
 
-      while (foregroundPtr < &foregroundProbs.back()) {
-        f = *foregroundPtr;
-        toForeground += f;
-        i = *(insertionPtr + 1);
-        *foregroundPtr = toBackground + f2f2 * f + (i + d);
-        double oneGapProb_f = oneGapProb * f;
-        *insertionPtr = oneGapProb_f + g2g * i;
-        d = oneGapProb_f + g2g * d;
-        ++foregroundPtr;
-        ++insertionPtr;
-        toForeground *= b2fGrowth;
-      }
-
+    while (foregroundPtr < &foregroundProbs.back()) {
       f = *foregroundPtr;
       toForeground += f;
-      *foregroundPtr = toBackground + f2f1 * f + d;
-      *insertionPtr = endGapProb * f;
+      i = *(insertionPtr + 1);
+      *foregroundPtr = toBackground + f2f2 * f + (i + d);
+      double oneGapProb_f = oneGapProb * f;
+      *insertionPtr = oneGapProb_f + g2g * i;
+      d = oneGapProb_f + g2g * d;
+      ++foregroundPtr;
+      ++insertionPtr;
+      toForeground *= b2fGrowth;
     }
+
+    f = *foregroundPtr;
+    toForeground += f;
+    *foregroundPtr = toBackground + f2f1 * f + d;
+    *insertionPtr = endGapProb * f;
 
     toForeground *= b2fLast;
     backgroundProb = b2b * backgroundProb + toForeground;
