@@ -73,12 +73,13 @@ void initScoresAndProbabilities() {
 
   ScoreMatrix scoreMatrix;
 
-  if (options.scoreMatrixFileName)
+  if (options.scoreMatrixFileName) {
     unfilify(scoreMatrix, options.scoreMatrixFileName);
-  else if (options.isProtein)
+  } else if (options.isProtein) {
     unstringify(scoreMatrix, ScoreMatrix::blosum62);
-  else
+  } else {
     scoreMatrix.initMatchMismatch(1, 1, "ACGTU");  // allow for RNA
+  }
 
   scoreMatrix.makeFastMatrix(fastMatrixPointers, scoreMatrixSize,
                              alphabet.lettersToNumbers,
@@ -88,9 +89,11 @@ void initScoresAndProbabilities() {
   if (smp.isBad())
     throw Error("can't calculate probabilities for this score matrix");
 
-  for (int i = 0; i < scoreMatrixSize; ++i)
-    for (int j = 0; j < scoreMatrixSize; ++j)
+  for (int i = 0; i < scoreMatrixSize; ++i) {
+    for (int j = 0; j < scoreMatrixSize; ++j) {
       probMatrix[i][j] = std::exp(smp.lambda() * fastMatrix[i][j]);
+    }
+  }
 
   if (options.gapExtensionCost > 0) {
     int firstGapCost = options.gapExistenceCost + options.gapExtensionCost;

@@ -8,7 +8,7 @@ cd $(dirname $0)
 PATH=../src:$PATH
 
 countLowercaseLetters () {
-    grep -v '^>' "$@" | tr -cd a-z | wc -c
+    grep -v '^>' "$@" | tr -cd a-z | wc -c | tr -d ' '
 }
 
 {
@@ -27,5 +27,5 @@ countLowercaseLetters () {
     tantan -p -a11 -b2 titin_human.fa | countLowercaseLetters
     echo
     tantan panda.fastq
-} |
-diff tantan_test.out -
+} 2>&1 |
+diff -u tantan_test.out -

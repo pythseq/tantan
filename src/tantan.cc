@@ -281,12 +281,17 @@ struct Tantan {
     }
   }
 
+  bool isNearSeqBeg() {
+    return seqPtr - seqBeg < maxRepeatOffset;
+  }
+
+  const uchar *seqFurthestBack() {
+    return isNearSeqBeg() ? seqBeg : seqPtr - maxRepeatOffset;
+  }
+
   void calcEmissionProbs() {
     const double *lrRow = likelihoodRatioMatrix[*seqPtr];
-
-    bool isNearSeqBeg = (seqPtr - seqBeg < maxRepeatOffset);
-    const uchar *seqStop = isNearSeqBeg ? seqBeg : seqPtr - maxRepeatOffset;
-
+    const uchar *seqStop = seqFurthestBack();
     double *foregroundPtr = BEG(foregroundProbs);
     const uchar *offsetPtr = seqPtr;
 
