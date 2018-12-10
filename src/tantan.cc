@@ -125,8 +125,7 @@ struct Tantan {
   double forwardTotal() {
     double fromForeground = std::accumulate(foregroundProbs.begin(),
                                             foregroundProbs.end(), 0.0);
-    fromForeground *= f2b;
-    double total = backgroundProb * b2b + fromForeground;
+    double total = backgroundProb * b2b + fromForeground * f2b;
     assert(total > 0);
     return total;
   }
@@ -172,8 +171,7 @@ struct Tantan {
     *foregroundPtr = fromBackground + f * f2f1 + d * endGapProb;
     *insertionPtr = f;
 
-    fromForeground *= f2b;
-    backgroundProb = backgroundProb * b2b + fromForeground;
+    backgroundProb = backgroundProb * b2b + fromForeground * f2b;
   }
 
   void calcBackwardTransitionProbsWithGaps() {
@@ -207,8 +205,7 @@ struct Tantan {
     *foregroundPtr = toBackground + f2f1 * f + d;
     *insertionPtr = endGapProb * f;
 
-    toForeground *= b2fLast;
-    backgroundProb = b2b * backgroundProb + toForeground;
+    backgroundProb = b2b * backgroundProb + b2fLast * toForeground;
   }
 
   void calcForwardTransitionProbs() {
@@ -227,8 +224,7 @@ struct Tantan {
       fromBackground *= b2fGrowth;
     }
 
-    fromForeground *= f2b;
-    backgroundProb = backgroundProb * b2b + fromForeground;
+    backgroundProb = backgroundProb * b2b + fromForeground * f2b;
   }
 
   void calcBackwardTransitionProbs() {
@@ -247,8 +243,7 @@ struct Tantan {
       ++foregroundPtr;
     }
 
-    toForeground *= b2fLast;
-    backgroundProb = b2b * backgroundProb + toForeground;
+    backgroundProb = b2b * backgroundProb + b2fLast * toForeground;
   }
 
   void addEndCounts(double forwardProb,
