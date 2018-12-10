@@ -18,6 +18,8 @@ struct TantanOptions {
   double repeatEndProb;
   int maxCycleLength;
   double repeatOffsetProbDecay;
+  int matchScore;
+  int mismatchCost;
   int gapExistenceCost;
   int gapExtensionCost;
   double minMaskProb;

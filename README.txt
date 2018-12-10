@@ -141,6 +141,8 @@ Options
 -e  probability of a repeat ending per position
 -w  maximum tandem repeat period to consider
 -d  probability decay per period (period-(i+1) / period-i)
+-i  match score
+-j  mismatch cost
 -a  gap existence cost
 -b  gap extension cost
 -s  minimum repeat probability for masking

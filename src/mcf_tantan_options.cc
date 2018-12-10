@@ -52,6 +52,8 @@ TantanOptions::TantanOptions() :
     repeatEndProb(0.05),
     maxCycleLength(-1),  // depends on isProtein
     repeatOffsetProbDecay(0.9),
+    matchScore(0),
+    mismatchCost(0),
     gapExistenceCost(0),
     gapExtensionCost(-1),  // means: no gaps
     minMaskProb(0.5),
@@ -75,6 +77,8 @@ Options (default settings):\n\
  -w  maximum tandem repeat period to consider (100, but -p selects 50)\n\
  -d  probability decay per period ("
       + stringify(repeatOffsetProbDecay) + ")\n\
+ -i  match score (1, but -p selects BLOSUM62)\n\
+ -j  mismatch cost (1, but -p selects BLOSUM62)\n\
  -a  gap existence cost ("
       + stringify(gapExistenceCost) + ")\n\
  -b  gap extension cost (infinite: no gaps)\n\
@@ -94,7 +98,7 @@ Home page: http://www.cbrc.jp/tantan/\n\
 #include "version.hh"
       "\n";
 
-  const char *optstring = "px:cm:r:e:w:d:a:b:s:f:h";
+  const char *optstring = "px:cm:r:e:w:d:i:j:a:b:s:f:h";
 
   int i;
   while ((i = myGetopt(argc, argv, optstring, help, version)) != -1) {
@@ -132,6 +136,16 @@ Home page: http://www.cbrc.jp/tantan/\n\
         if (repeatOffsetProbDecay <= 0 || repeatOffsetProbDecay > 1)
           badopt(c, optarg);
         break;
+      case 'i':
+	unstringify(matchScore, optarg);
+	if (matchScore <= 0)
+	  badopt(c, optarg);
+	break;
+      case 'j':
+	unstringify(mismatchCost, optarg);
+	if (mismatchCost <= 0)
+	  badopt(c, optarg);
+	break;
       case 'a':
         unstringify(gapExistenceCost, optarg);
         break;

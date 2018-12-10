@@ -76,9 +76,17 @@ void initScoresAndProbabilities() {
   if (options.scoreMatrixFileName) {
     unfilify(scoreMatrix, options.scoreMatrixFileName);
   } else if (options.isProtein) {
-    unstringify(scoreMatrix, ScoreMatrix::blosum62);
+    if (options.matchScore || options.mismatchCost) {
+      scoreMatrix.initMatchMismatch(std::max(options.matchScore, 1),
+				    std::max(options.mismatchCost, 1),
+				    Alphabet::protein);
+    } else {
+      unstringify(scoreMatrix, ScoreMatrix::blosum62);
+    }
   } else {
-    scoreMatrix.initMatchMismatch(1, 1, "ACGTU");  // allow for RNA
+    scoreMatrix.initMatchMismatch(std::max(options.matchScore, 1),
+				  std::max(options.mismatchCost, 1),
+				  "ACGTU");  // allow for RNA
   }
 
   scoreMatrix.makeFastMatrix(fastMatrixPointers, scoreMatrixSize,
