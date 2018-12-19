@@ -71,7 +71,6 @@ private:
   void calcBackwardTransitionScoresWithGaps();
   void calcBackwardTransitionScores();
   void calcEmissionScores();
-  void calcScoresForOneSequencePosition();
   void makeCheckpoint();
   void redoCheckpoint();
   int offsetWithMaxScore() const;
@@ -85,12 +84,13 @@ private:
     return isNearSeqBeg() ? (seqPtr - seqBeg) : maxRepeatOffset;
   }
 
-  const uchar *seqFurthestBack() const {
-    return isNearSeqBeg() ? seqBeg : seqPtr - maxRepeatOffset;
-  }
-
   double scoreWithEmission(const double *matrixRow, int offset) const {
     return scoresPtr[offset] + matrixRow[seqPtr[-offset]];
+  }
+
+  void calcScoresForOneSequencePosition() {
+    calcEmissionScores();
+    calcBackwardTransitionScores();
   }
 };
 

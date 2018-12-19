@@ -141,27 +141,21 @@ void RepeatFinder::calcBackwardTransitionScores() {
 
 void RepeatFinder::calcEmissionScores() {
   const double *matrixRow = substitutionMatrix[*seqPtr];
-  const uchar *seqStop = seqFurthestBack();
-  double *foregroundPtr = scoresPtr + 1;
-  double *foregroundEnd = foregroundPtr + maxRepeatOffset;
-  const uchar *offsetPtr = seqPtr;
+  double *oldScores = scoresPtr - dpScoresPerLetter;
+  int maxOffset = maxOffsetInTheSequence();
+  int i = 1;
 
-  while (offsetPtr > seqStop) {
-    --offsetPtr;
-    *foregroundPtr += matrixRow[*offsetPtr];
-    ++foregroundPtr;
+  scoresPtr[0] = oldScores[0];
+
+  for (; i <= maxOffset; ++i) {
+    scoresPtr[i] = oldScores[i] + matrixRow[seqPtr[-i]];
   }
 
-  while (foregroundPtr < foregroundEnd) {
-    *foregroundPtr = -HUGE_VAL;
-    ++foregroundPtr;
+  for (; i <= maxRepeatOffset; ++i) {
+    scoresPtr[i] = -HUGE_VAL;
   }
-}
 
-void RepeatFinder::calcScoresForOneSequencePosition() {
-  std::copy(scoresPtr - dpScoresPerLetter, scoresPtr, scoresPtr);
-  calcEmissionScores();
-  calcBackwardTransitionScores();
+  std::copy(oldScores + i, scoresPtr, scoresPtr + i);
 }
 
 void RepeatFinder::makeCheckpoint() {
