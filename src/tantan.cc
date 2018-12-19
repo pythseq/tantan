@@ -20,10 +20,10 @@ void multiplyAll(std::vector<double> &v, double factor) {
 }
 
 double firstRepeatOffsetProb(double probMult, int maxRepeatOffset) {
-  if (probMult < 1 || probMult > 1)
+  if (probMult < 1 || probMult > 1) {
     return (1 - probMult) / (1 - std::pow(probMult, maxRepeatOffset));
-  else
-    return 1.0 / maxRepeatOffset;
+  }
+  return 1.0 / maxRepeatOffset;
 }
 
 void checkForwardAndBackwardTotals(double fTot, double bTot) {

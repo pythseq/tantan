@@ -14,12 +14,12 @@
 #include <algorithm>  // copy, fill_n
 #include <cassert>
 #include <cmath>
-#include <cstring>  // strchr
 #include <cstdlib>  // EXIT_SUCCESS, EXIT_FAILURE
 #include <exception>  // exception
 #include <fstream>
 #include <iostream>
 #include <new>  // bad_alloc
+#include <string.h>
 
 #define BEG(v) ((v).empty() ? 0 : &(v).front())
 #define END(v) ((v).empty() ? 0 : &(v).back() + 1)
@@ -33,7 +33,7 @@ bool isDubiousDna(const uchar *beg, const uchar *end) {
   int badLetters = 0;
   if (end - beg > 100) end = beg + 100;  // just check the first 100 letters
   while (beg < end) {
-    if (!std::strchr("AaCcGgTtNnUu", *beg)) {
+    if (!strchr("AaCcGgTtNnUu", *beg)) {
       ++badLetters;
       if (badLetters > 10) return true;
     }
@@ -76,16 +76,14 @@ void initScoresAndProbabilities() {
   if (options.scoreMatrixFileName) {
     unfilify(scoreMatrix, options.scoreMatrixFileName);
   } else if (options.isProtein) {
-    if (options.matchScore || options.mismatchCost) {
-      scoreMatrix.initMatchMismatch(std::max(options.matchScore, 1),
-				    std::max(options.mismatchCost, 1),
+    if (options.matchScore && options.mismatchCost) {
+      scoreMatrix.initMatchMismatch(options.matchScore, options.mismatchCost,
 				    Alphabet::protein);
     } else {
       unstringify(scoreMatrix, ScoreMatrix::blosum62);
     }
   } else {
-    scoreMatrix.initMatchMismatch(std::max(options.matchScore, 1),
-				  std::max(options.mismatchCost, 1),
+    scoreMatrix.initMatchMismatch(options.matchScore, options.mismatchCost,
 				  "ACGTU");  // allow for RNA
   }
 

@@ -69,7 +69,7 @@ Options (default settings):\n\
  -p  interpret the sequences as proteins\n\
  -x  letter to use for masking, instead of lowercase\n\
  -c  preserve uppercase/lowercase in non-masked regions\n\
- -m  file for letter pair scores (+1/-1, but -p selects BLOSUM62)\n\
+ -m  file for letter-pair score matrix\n\
  -r  probability of a repeat starting per position ("
       + stringify(repeatProb) + ")\n\
  -e  probability of a repeat ending per position ("
@@ -77,8 +77,8 @@ Options (default settings):\n\
  -w  maximum tandem repeat period to consider (100, but -p selects 50)\n\
  -d  probability decay per period ("
       + stringify(repeatOffsetProbDecay) + ")\n\
- -i  match score (1, but -p selects BLOSUM62)\n\
- -j  mismatch cost (1, but -p selects BLOSUM62)\n\
+ -i  match score (BLOSUM62 if -p, else 1)\n\
+ -j  mismatch cost (BLOSUM62 if -p, else 1)\n\
  -a  gap existence cost ("
       + stringify(gapExistenceCost) + ")\n\
  -b  gap extension cost (infinite: no gaps)\n\
@@ -172,6 +172,11 @@ Home page: http://www.cbrc.jp/tantan/\n\
     throw Error("gap existence + extension cost is too low");
 
   if (maxCycleLength < 0) maxCycleLength = (isProtein ? 50 : 100);
+
+  if (!isProtein || matchScore || mismatchCost) {
+    if (matchScore   == 0) matchScore   = 1;
+    if (mismatchCost == 0) mismatchCost = 1;
+  }
 
   indexOfFirstNonOptionArgument = optind;
 }

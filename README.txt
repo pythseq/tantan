@@ -136,7 +136,7 @@ Options
 -p  interpret the sequences as proteins
 -x  letter to use for masking, instead of lowercase
 -c  preserve uppercase/lowercase in non-masked regions
--m  file for letter pair scores (scoring matrix)
+-m  file for letter-pair score matrix
 -r  probability of a repeat starting per position
 -e  probability of a repeat ending per position
 -w  maximum tandem repeat period to consider
