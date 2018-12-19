@@ -64,6 +64,7 @@ struct Tantan {
   double b2fLast;  // background state to last foreground state
 
   double backgroundProb;
+  std::vector<double> b2fProbs;  // background state to each foreground state
   std::vector<double> foregroundProbs;
   std::vector<double> insertionProbs;
 
@@ -110,8 +111,15 @@ struct Tantan {
     b2fFirst = repeatProb * firstRepeatOffsetProb(b2fDecay, maxRepeatOffset);
     b2fLast = repeatProb * firstRepeatOffsetProb(b2fGrowth, maxRepeatOffset);
 
+    b2fProbs.resize(maxRepeatOffset);
     foregroundProbs.resize(maxRepeatOffset);
     insertionProbs.resize(maxRepeatOffset - 1);
+
+    double p = b2fFirst;
+    for (int i = 0; i < maxRepeatOffset; ++i) {
+      b2fProbs[i] = p;
+      p *= b2fDecay;
+    }
 
     scaleFactors.resize((seqEnd - seqBeg) / scaleStepSize);
   }
@@ -211,20 +219,17 @@ struct Tantan {
   void calcForwardTransitionProbs() {
     if (endGapProb > 0) return calcForwardTransitionProbsWithGaps();
 
-    double fromBackground = backgroundProb * b2fLast;
+    double b = backgroundProb;
     double fromForeground = 0;
-    double *foregroundPtr = END(foregroundProbs);
     double *foregroundBeg = BEG(foregroundProbs);
 
-    while (foregroundPtr > foregroundBeg) {
-      --foregroundPtr;
-      double f = *foregroundPtr;
+    for (int i = 0; i < maxRepeatOffset; ++i) {
+      double f = foregroundBeg[i];
       fromForeground += f;
-      *foregroundPtr = fromBackground + f * f2f0;
-      fromBackground *= b2fGrowth;
+      foregroundBeg[i] = b * b2fProbs[i] + f * f2f0;
     }
 
-    backgroundProb = backgroundProb * b2b + fromForeground * f2b;
+    backgroundProb = b * b2b + fromForeground * f2b;
   }
 
   void calcBackwardTransitionProbs() {
@@ -232,18 +237,15 @@ struct Tantan {
 
     double toBackground = f2b * backgroundProb;
     double toForeground = 0;
-    double *foregroundPtr = BEG(foregroundProbs);
-    double *foregroundEnd = END(foregroundProbs);
+    double *foregroundBeg = BEG(foregroundProbs);
 
-    while (foregroundPtr < foregroundEnd) {
-      toForeground *= b2fGrowth;
-      double f = *foregroundPtr;
-      toForeground += f;
-      *foregroundPtr = toBackground + f2f0 * f;
-      ++foregroundPtr;
+    for (int i = 0; i < maxRepeatOffset; ++i) {
+      double f = foregroundBeg[i];
+      toForeground += b2fProbs[i] * f;
+      foregroundBeg[i] = toBackground + f2f0 * f;
     }
 
-    backgroundProb = b2b * backgroundProb + b2fLast * toForeground;
+    backgroundProb = b2b * backgroundProb + toForeground;
   }
 
   void addEndCounts(double forwardProb,
