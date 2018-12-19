@@ -23,7 +23,8 @@ struct TantanOptions {
   int gapExistenceCost;
   int gapExtensionCost;
   double minMaskProb;
-  enum OutputType { maskOut, probOut, countOut, bedOut } outputType;
+  double minCopyNumber;
+  enum OutputType { maskOut, probOut, countOut, bedOut, repOut } outputType;
 
   int indexOfFirstNonOptionArgument;
 };

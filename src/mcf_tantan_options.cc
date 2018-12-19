@@ -36,7 +36,7 @@ static int myGetopt(int argc, char **argv, const char *optstring,
 std::istream &operator>>(std::istream &s, TantanOptions::OutputType &x) {
   int i = 0;
   s >> i;
-  if (i < 0 || i > 3)
+  if (i < 0 || i > 4)
     s.setstate(std::ios::failbit);
   if (s)
     x = static_cast<TantanOptions::OutputType>(i);
@@ -57,6 +57,7 @@ TantanOptions::TantanOptions() :
     gapExistenceCost(0),
     gapExtensionCost(-1),  // means: no gaps
     minMaskProb(0.5),
+    minCopyNumber(2.0),
     outputType(maskOut),
     indexOfFirstNonOptionArgument(-1) {}
 
@@ -77,15 +78,17 @@ Options (default settings):\n\
  -w  maximum tandem repeat period to consider (100, but -p selects 50)\n\
  -d  probability decay per period ("
       + stringify(repeatOffsetProbDecay) + ")\n\
- -i  match score (BLOSUM62 if -p, else 1)\n\
- -j  mismatch cost (BLOSUM62 if -p, else 1)\n\
+ -i  match score (BLOSUM62 if -p, else 2 if -f4, else 1)\n\
+ -j  mismatch cost (BLOSUM62 if -p, else 7 if -f4, else 1)\n\
  -a  gap existence cost ("
       + stringify(gapExistenceCost) + ")\n\
- -b  gap extension cost (infinite: no gaps)\n\
+ -b  gap extension cost (7 if -f4, else infinity)\n\
  -s  minimum repeat probability for masking ("
       + stringify(minMaskProb) + ")\n\
+ -n  minimum copy number, affects -f4 only ("
+      + stringify(minCopyNumber) + ")\n\
  -f  output type: 0=masked sequence, 1=repeat probabilities,\n\
-                  2=repeat counts, 3=BED ("
+                  2=repeat counts, 3=BED, 4=tandem repeats ("
       + stringify(outputType) + ")\n\
  -h, --help  show help message, then exit\n\
  --version   show version information, then exit\n\
@@ -93,12 +96,13 @@ Options (default settings):\n\
 Report bugs to: tantan@cbrc.jp\n\
 Home page: http://www.cbrc.jp/tantan/\n\
 ";
+  // -k for transition cost?
 
   std::string version = "tantan "
 #include "version.hh"
       "\n";
 
-  const char *optstring = "px:cm:r:e:w:d:i:j:a:b:s:f:h";
+  const char *optstring = "px:cm:r:e:w:d:i:j:a:b:s:n:f:h";
 
   int i;
   while ((i = myGetopt(argc, argv, optstring, help, version)) != -1) {
@@ -158,6 +162,9 @@ Home page: http://www.cbrc.jp/tantan/\n\
         unstringify(minMaskProb, optarg);
         // don't bother checking for stupid values?
         break;
+      case 'n':
+	unstringify(minCopyNumber, optarg);
+	break;
       case 'f':
         unstringify(outputType, optarg);
         break;
@@ -168,14 +175,16 @@ Home page: http://www.cbrc.jp/tantan/\n\
     }
   }
 
+  if (gapExtensionCost < 0 && outputType == repOut) gapExtensionCost = 7;
+
   if (gapExtensionCost > 0 && gapExistenceCost + gapExtensionCost <= 0)
     throw Error("gap existence + extension cost is too low");
 
   if (maxCycleLength < 0) maxCycleLength = (isProtein ? 50 : 100);
 
   if (!isProtein || matchScore || mismatchCost) {
-    if (matchScore   == 0) matchScore   = 1;
-    if (mismatchCost == 0) mismatchCost = 1;
+    if (matchScore   == 0) matchScore   = (outputType == repOut ? 2 : 1);
+    if (mismatchCost == 0) mismatchCost = (outputType == repOut ? 7 : 1);
   }
 
   indexOfFirstNonOptionArgument = optind;

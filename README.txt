@@ -146,8 +146,9 @@ Options
 -a  gap existence cost
 -b  gap extension cost
 -s  minimum repeat probability for masking
+-n  minimum copy number, affects -f4 only
 -f  output type: 0=masked sequence, 1=repeat probabilities,
-                 2=repeat counts, 3=BED
+                 2=repeat counts, 3=BED, 4=tandem repeats
 -h, --help  show help message, then exit
 --version   show version information, then exit
 
@@ -171,6 +172,31 @@ align it on the other strand::
   TGCTAGCAA ttaggcttaggtcagtgc TTAGGCTTAGGTCAGTGC AACGTA
 
 (My thanks to Junko Tsuji and Paul Horton for finding these issues.)
+
+Finding straightforward tandem repeats
+--------------------------------------
+
+Option -f4 runs tantan in a different mode, where it finds
+straightforward tandem repeats only.  (Technically, it uses a Viterbi
+algorithm instead of a Forward-Backward algorithm.)  This is *not*
+recommended for avoiding false homologs!  But it might be useful for
+studying tandem repeats.  The output looks like this::
+
+  mySeq   14765   14780   6       2.5     GTCATG  GTCATG,GTCATG,GTC
+  mySeq   632362  632377  2       6       GC      GC,GC,GC,GCt,GCT,GCT
+  mySeq   1278353 1278369 3       6.5     TCA     TCA,TCA,TCA,TC-,TC,TC,T
+  mySeq   3616084 3616100 3       5.33333 TGG     TGA,TGA,TGG,TGG,TGG,T
+
+The first 3 columns show the start and end coordinates of the
+repetitive region, in `BED
+<https://genome.ucsc.edu/FAQ/FAQformat.html#format1>`_ format.  Column
+4 shows the length of the repeating unit (which might vary due to
+insertions and deletions, so this column shows the most common
+length).  Column 5 shows the number of repeat units.  Column 6 shows
+the repeating unit (which again might vary, so this is just a
+representative).  Column 7 shows the whole repeat: lowercase letters
+are insertions relative to the previous repeat unit, and dashes are
+deletions relative to the previous repeat unit.
 
 Miscellaneous
 -------------

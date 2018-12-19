@@ -9,6 +9,7 @@
 #include "mcf_tantan_options.hh"
 #include "mcf_util.hh"
 #include "tantan.hh"
+#include "tantan_repeat_finder.hh"
 #include "LambdaCalculator.hh"
 
 #include <algorithm>  // copy, fill_n
@@ -45,6 +46,7 @@ bool isDubiousDna(const uchar *beg, const uchar *end) {
 namespace {
 TantanOptions options;
 Alphabet alphabet;
+tantan::RepeatFinder repeatFinder;
 
 enum { scoreMatrixSize = 64 };
 int fastMatrix[scoreMatrixSize][scoreMatrixSize];
@@ -99,7 +101,9 @@ void initScoresAndProbabilities() {
 
   for (int i = 0; i < scoreMatrixSize; ++i) {
     for (int j = 0; j < scoreMatrixSize; ++j) {
-      probMatrix[i][j] = std::exp(matrixLambda * fastMatrix[i][j]);
+      double x = matrixLambda * fastMatrix[i][j];
+      if (options.outputType != options.repOut) x = std::exp(x);
+      probMatrix[i][j] = x;
     }
   }
 
@@ -113,6 +117,10 @@ void initScoresAndProbabilities() {
 
     // XXX check if firstGapProb is too high
   }
+
+  repeatFinder.init(options.maxCycleLength, probMatrixPointers,
+		    options.repeatProb, options.repeatEndProb,
+		    options.repeatOffsetProbDecay, firstGapProb, otherGapProb);
 
   //std::cerr << "lambda: " << matrixLambda << "\n";
   //std::cerr << "firstGapProb: " << firstGapProb << "\n";
@@ -155,6 +163,138 @@ void writeBed(const float *probBeg, const float *probEnd,
   if (maskBeg) writeBedLine(seqName, probBeg, maskBeg, probEnd, output);
 }
 
+void storeSequence(const uchar *beg, const uchar *end, std::string &out) {
+  out.clear();
+  for (const uchar *i = beg; i < end; ++i) {
+    out.push_back(std::toupper(alphabet.numbersToLetters[*i]));
+  }
+}
+
+struct RepeatUnit {
+  const uchar *beg;
+  int len;
+};
+
+bool less(const RepeatUnit &x, const RepeatUnit &y) {
+  if (x.len != y.len) return x.len < y.len;
+  int c = memcmp(x.beg, y.beg, x.len);
+  if (c != 0) return c < 0;
+  return x.beg > y.beg;
+}
+
+int mainLen(const std::vector<RepeatUnit> &repUnits) {
+  int bestLen;
+  size_t bestCount = 0;
+  size_t count = 0;
+  for (size_t i = 0; i < repUnits.size(); ++i) {
+    if (i && repUnits[i].len > repUnits[i - 1].len) {
+      count = 0;
+    }
+    ++count;
+    if (count > bestCount) {
+      bestCount = count;
+      bestLen = repUnits[i].len;
+    }
+  }
+  return bestLen;
+}
+
+const uchar *mainBeg(const std::vector<RepeatUnit> &repUnits, int len) {
+  const uchar *bestBeg;
+  size_t bestCount = 0;
+  size_t count = 0;
+  for (size_t i = 0; i < repUnits.size(); ++i) {
+    if (repUnits[i].len != len) continue;
+    if (count && memcmp(repUnits[i - 1].beg, repUnits[i].beg, len) != 0) {
+      count = 0;
+    }
+    ++count;
+    if (count < bestCount) continue;
+    if (count > bestCount || repUnits[i].beg < bestBeg) {
+      bestCount = count;
+      bestBeg = repUnits[i].beg;
+    }
+  }
+  return bestBeg;
+}
+
+void writeRepeat(const FastaSequence &f,
+		 const uchar *repBeg, const uchar *repEnd,
+		 const std::string &repText, std::vector<RepeatUnit> &repUnits,
+		 const uchar *commaPos, int finalOffset) {
+  double repeatCount = count(repText.begin(), repText.end(), ',');
+  double copyNumber = repeatCount + (repEnd - commaPos) * 1.0 / finalOffset;
+  if (copyNumber < options.minCopyNumber) return;
+
+  sort(repUnits.begin(), repUnits.end(), less);
+  int bestLen = mainLen(repUnits);
+  const uchar *bestBeg = mainBeg(repUnits, bestLen);
+
+  const uchar *beg = BEG(f.sequence);
+  std::cout << firstWord(f.title) << '\t'
+	    << (repBeg - beg) << '\t' << (repEnd - beg) << '\t'
+	    << bestLen << '\t' << copyNumber << '\t';
+  for (int i = 0; i < bestLen; ++i) {
+    char c = std::toupper(alphabet.numbersToLetters[bestBeg[i]]);
+    std::cout << c;
+  }
+  std::cout << '\t';
+  std::cout << repText << '\n';
+}
+
+void findRepeatsInOneSequence(const FastaSequence &f) {
+  const uchar *beg = BEG(f.sequence);
+  const uchar *end = END(f.sequence);
+
+  repeatFinder.calcBestPathScore(beg, end);
+
+  std::vector<RepeatUnit> repUnits;
+  std::string repText;
+  const uchar *repBeg;
+  const uchar *commaPos;
+  int state = 0;
+
+  for (const uchar *seqPtr = beg; seqPtr < end; ++seqPtr) {
+    int newState = repeatFinder.nextState();
+
+    if (newState == 0) {
+      if (state > 0) {
+	writeRepeat(f, repBeg, seqPtr, repText, repUnits, commaPos, state);
+      }
+    } else if (newState <= options.maxCycleLength) {
+      if (state == 0) {
+	repUnits.clear();
+	repBeg = seqPtr - newState;
+	storeSequence(repBeg, seqPtr, repText);
+	commaPos = repBeg;
+      } else if (state <= options.maxCycleLength) {
+	for (int i = state; i > newState; --i) {
+	  if (seqPtr - commaPos >= i) {
+	    repText.push_back(',');
+	    commaPos = seqPtr;
+	  }
+	  repText.push_back('-');
+	}
+      }
+      RepeatUnit unit = {seqPtr - newState, newState};
+      repUnits.push_back(unit);
+      if (seqPtr - commaPos >= newState) {
+	repText.push_back(',');
+	commaPos = seqPtr;
+      }
+      repText.push_back(std::toupper(alphabet.numbersToLetters[*seqPtr]));
+    } else {
+      repText.push_back(std::tolower(alphabet.numbersToLetters[*seqPtr]));
+    }
+
+    state = newState;
+  }
+
+  if (state > 0) {
+    writeRepeat(f, repBeg, end, repText, repUnits, commaPos, state);
+  }
+}
+
 void processOneSequence(FastaSequence &f, std::ostream &output) {
   uchar *beg = BEG(f.sequence);
   uchar *end = END(f.sequence);
@@ -179,6 +319,8 @@ void processOneSequence(FastaSequence &f, std::ostream &output) {
                              BEG(transitionCounts));
     double sequenceLength = static_cast<double>(f.sequence.size());
     transitionTotal += sequenceLength + 1;
+  } else if (options.outputType == options.repOut) {
+    findRepeatsInOneSequence(f);
   } else {
     std::vector<float> probabilities(end - beg);
     float *probBeg = BEG(probabilities);
