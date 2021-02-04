@@ -14,10 +14,22 @@
 #define LAMBDA_CALCULATOR_HH
 
 #include <vector>
+#include <stdio.h>  // sprintf
+#include <stdlib.h>  // atof
 
 namespace cbrc{
 
 typedef const int *const_int_ptr;
+
+inline double roundToFewDigits(double x)
+{
+  // This rounding fixes some inaccuracies, e.g. for DNA with a simple
+  // match/mismatch matrix it's likely to make all the probabilities
+  // exactly 0.25, as they should be.
+  char buffer[32];
+  sprintf(buffer, "%g", x);
+  return atof(buffer);
+}
 
 class LambdaCalculator{
  public:
@@ -50,7 +62,7 @@ class LambdaCalculator{
   bool find_ub(double **matrix, int alpha_size, double *ub);
   bool binary_search(double** matrix, int alpha_size, double lb, double ub, std::vector<double>& letprob1, std::vector<double>& letprob2, double* lambda, int maxiter);
   double calculate_lambda(double** matrix, int alpha_size, std::vector<double>& letprob1, std::vector<double>& letprob2, int maxiter, int max_boundary_search_iter, double lb_ratio);
-  bool check_lambda(double** matrix, double lambda, int alpha_size, std::vector<double>& letprob1, std::vector<double>& letprob2);
+  bool check_lambda(double** matrix, double lambda, int alpha_size, std::vector<double>& letprob1, std::vector<double>& letprob2, double** tmpMat);
 };
 
 }  // end namespace
