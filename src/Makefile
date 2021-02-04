@@ -9,7 +9,7 @@ clean:
 	rm -f tantan
 
 VERSION1 = git describe --dirty
-VERSION2 = echo '$$Format:%d$$' | sed -e 's/.*tag: *//' -e 's/,* .*//'
+VERSION2 = echo '$Format:%d$ ' | sed -e 's/.*tag: *//' -e 's/[,) ].*//'
 
 VERSION = \"`test -e ../.git && $(VERSION1) || $(VERSION2)`\"
 
