@@ -208,8 +208,3 @@ details, see COPYING.txt.
 If you use tantan in your research, please cite:
 "A new repeat-masking method enables specific detection of homologous
 sequences", MC Frith, Nucleic Acids Research 2011 39(4):e23.
-
-tantan's website is: http://www.cbrc.jp/tantan/
-
-If you have any questions, comments, or problems concerning tantan,
-please email: tantan (ATmark) cbrc (dot) jp.

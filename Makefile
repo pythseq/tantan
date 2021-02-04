@@ -12,14 +12,5 @@ install: all
 clean:
 	@cd src && ${MAKE} clean
 
-README.html: README.txt
-	rst2html README.txt > README.html
-
-log:
-	hg log --style changelog > ChangeLog.txt
-
-distdir = tantan-`hg id -n`
-dist: README.html log
-	@cd src && ${MAKE} version.hh
-	rsync -rC --exclude tantan src test Makefile *.txt README.html ${distdir}
-	zip -qrm ${distdir} ${distdir}
+tag:
+	git tag -m "" `git rev-list HEAD^ | grep -c .`

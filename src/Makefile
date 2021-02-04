@@ -1,6 +1,4 @@
-CXXFLAGS = -O3 -Wall -W -Wcast-qual -Wswitch-enum -Wundef	\
--Wcast-align -Wold-style-cast
-# -Wconversion
+CXXFLAGS = -O3 -Wall
 
 all: tantan
 
@@ -10,11 +8,12 @@ tantan: *.cc *.hh version.hh Makefile
 clean:
 	rm -f tantan
 
-VERSION = \"`hg id -n`\"
+VERSION1 = git describe --dirty
+VERSION2 = echo '$$Format:%d$$' | sed -e 's/.*tag: *//' -e 's/,* .*//'
+
+VERSION = \"`test -e ../.git && $(VERSION1) || $(VERSION2)`\"
 
 version.hh: FORCE
-	if test -e ../.hg; \
-	then echo $(VERSION) | cmp -s $@ - || echo $(VERSION) > $@ ; \
-	fi
+	echo $(VERSION) | cmp -s $@ - || echo $(VERSION) > $@
 
 FORCE:

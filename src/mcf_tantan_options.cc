@@ -92,9 +92,6 @@ Options (default settings):\n\
       + stringify(outputType) + ")\n\
  -h, --help  show help message, then exit\n\
  --version   show version information, then exit\n\
-\n\
-Report bugs to: tantan@cbrc.jp\n\
-Home page: http://www.cbrc.jp/tantan/\n\
 ";
   // -k for transition cost?
 
