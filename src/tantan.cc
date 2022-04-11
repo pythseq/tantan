@@ -309,14 +309,15 @@ struct Tantan {
 
     double b = backgroundProb;
     double fromForeground = 0;
-    double *foregroundBeg = BEG(foregroundProbs);
+    const double *b2f = BEG(b2fProbs);
+    double *fp = BEG(foregroundProbs);
     const double *lrRow = likelihoodRatioMatrix[*seqPtr];
     int maxOffset = maxOffsetInTheSequence();
 
     for (int i = 0; i < maxOffset; ++i) {
-      double f = foregroundBeg[i];
+      double f = fp[i];
       fromForeground += f;
-      foregroundBeg[i] = (b * b2fProbs[i] + f * f2f0) * lrRow[seqPtr[-i-1]];
+      fp[i] = (b * b2f[i] + f * f2f0) * lrRow[seqPtr[-i-1]];
     }
 
     backgroundProb = b * b2b + fromForeground * f2b;
@@ -331,14 +332,15 @@ struct Tantan {
 
     double toBackground = f2b * backgroundProb;
     double toForeground = 0;
-    double *foregroundBeg = BEG(foregroundProbs);
+    const double *b2f = BEG(b2fProbs);
+    double *fp = BEG(foregroundProbs);
     const double *lrRow = likelihoodRatioMatrix[*seqPtr];
     int maxOffset = maxOffsetInTheSequence();
 
     for (int i = 0; i < maxOffset; ++i) {
-      double f = foregroundBeg[i] * lrRow[seqPtr[-i-1]];
-      toForeground += b2fProbs[i] * f;
-      foregroundBeg[i] = toBackground + f2f0 * f;
+      double f = fp[i] * lrRow[seqPtr[-i-1]];
+      toForeground += b2f[i] * f;
+      fp[i] = toBackground + f2f0 * f;
     }
 
     backgroundProb = b2b * backgroundProb + toForeground;
