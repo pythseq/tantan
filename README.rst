@@ -1,40 +1,39 @@
 tantan
 ======
 
-Introduction
-------------
-
-tantan is a tool for masking simple regions (low complexity and
-short-period tandem repeats) in biological sequences.
-
-The aim of tantan is to prevent false predictions when searching for
-homologous regions between two sequences.  Simple repeats often align
-strongly to each other, causing false homology predictions.
+tantan identifies simple regions / low complexity / tandem repeats in
+DNA or protein sequences.  Its main aim is to prevent false homology
+predictions between sequences.  Simple repeats often align strongly to
+each other, causing false homology predictions.
 
 Setup
 -----
 
-You need to have a C++ compiler.  On Linux, you might need to install
-a package called "g++".  On Mac, you might need to install
-command-line developer tools.  On Windows, you might need to install
-Cygwin.
-
-Using the command line, go into the tantan directory.  To compile it,
-type::
+Please download the highest version number from
+https://gitlab.com/mcfrith/tantan/-/tags.  Using the command line, go
+into the downloaded directory and type::
 
   make
 
-Optionally, copy tantan to a standard "bin" directory (using "sudo" to
-request administrator permissions)::
+This assumes you have a C++ compiler.  On Linux, you might need to
+install a package called "g++".  On Mac, you might need to install
+command-line developer tools.  On Windows, you might need to install
+Cygwin.
 
-  sudo make install
+This puts ``tantan`` in a ``bin`` directory.  For convenient usage,
+set up your computer to find it automatically.  Some possible ways:
 
-Or copy it to your personal bin directory::
+* Copy ``tantan`` to a standard directory: ``sudo make install``
+  (using "sudo" to request administrator permissions).
 
-  make install prefix=~
+* Copy it to your personal bin directory: ``make install prefix=~``
+
+* Adjust your `PATH variable`_.
 
 You might need to log out and back in for your computer to recognize
 the new program.
+
+**Alternative:** Install tantan from bioconda_.
 
 Normal usage
 ------------
@@ -133,6 +132,8 @@ repeats, so it's easy to lift the masking after determining homology.
 Options
 -------
 
+-h, --help  just show a help message, with default option values
+--version   just show version information
 -p  interpret the sequences as proteins
 -x  letter to use for masking, instead of lowercase
 -c  preserve uppercase/lowercase in non-masked regions
@@ -149,8 +150,6 @@ Options
 -n  minimum copy number, affects -f4 only
 -f  output type: 0=masked sequence, 1=repeat probabilities,
                  2=repeat counts, 3=BED, 4=tandem repeats
--h, --help  show help message, then exit
---version   show version information, then exit
 
 Advanced issues
 ---------------
@@ -176,7 +175,7 @@ align it on the other strand::
 Finding straightforward tandem repeats
 --------------------------------------
 
-Option -f4 runs tantan in a different mode, where it finds
+Option ``-f4`` runs tantan in a different mode, where it finds
 straightforward tandem repeats only.  (Technically, it uses a Viterbi
 algorithm instead of a Forward-Backward algorithm.)  This is *not*
 recommended for avoiding false homologs!  But it might be useful for
@@ -187,16 +186,14 @@ studying tandem repeats.  The output looks like this::
   mySeq   1278353 1278369 3       6.5     TCA     TCA,TCA,TCA,TC-,TC,TC,T
   mySeq   3616084 3616100 3       5.33333 TGG     TGA,TGA,TGG,TGG,TGG,T
 
-The first 3 columns show the start and end coordinates of the
-repetitive region, in `BED
-<https://genome.ucsc.edu/FAQ/FAQformat.html#format1>`_ format.  Column
-4 shows the length of the repeating unit (which might vary due to
-insertions and deletions, so this column shows the most common
-length).  Column 5 shows the number of repeat units.  Column 6 shows
-the repeating unit (which again might vary, so this is just a
-representative).  Column 7 shows the whole repeat: lowercase letters
-are insertions relative to the previous repeat unit, and dashes are
-deletions relative to the previous repeat unit.
+The first 3 columns show the start and end coordinates of the repeat,
+in BED_ format.  Column 4 shows the length of the repeating unit
+(which might vary due to insertions and deletions, so this column
+shows the most common length).  Column 5 shows the number of repeat
+units.  Column 6 shows the repeating unit (which again might vary, so
+this is just a representative).  Column 7 shows the whole repeat:
+lowercase letters are insertions relative to the previous repeat unit,
+and dashes are deletions relative to the previous repeat unit.
 
 Miscellaneous
 -------------
@@ -208,3 +205,7 @@ details, see COPYING.txt.
 If you use tantan in your research, please cite:
 "A new repeat-masking method enables specific detection of homologous
 sequences", MC Frith, Nucleic Acids Research 2011 39(4):e23.
+
+.. _BED: https://genome.ucsc.edu/FAQ/FAQformat.html#format1
+.. _PATH variable: https://en.wikipedia.org/wiki/PATH_(variable)
+.. _bioconda: https://bioconda.github.io/

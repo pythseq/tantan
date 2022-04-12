@@ -1,12 +1,13 @@
 CXXFLAGS = -msse4 -O3 -Wall -g
 
-all: tantan
+all: ../bin/tantan
 
-tantan: *.cc *.hh version.hh Makefile
+../bin/tantan: *.cc *.hh version.hh Makefile
+	mkdir -p ../bin
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@ *.cc
 
 clean:
-	rm -f tantan
+	rm -f ../bin/tantan
 
 VERSION1 = git describe --dirty
 VERSION2 = echo '$Format:%d$ ' | sed -e 's/.*tag: *//' -e 's/[,) ].*//'

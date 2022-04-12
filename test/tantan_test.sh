@@ -5,7 +5,7 @@
 cd $(dirname $0)
 
 # Make sure we use this version of tantan:
-PATH=../src:$PATH
+PATH=../bin:$PATH
 
 countLowercaseLetters () {
     grep -v '^>' "$@" | tr -cd a-z | wc -c | tr -d ' '
