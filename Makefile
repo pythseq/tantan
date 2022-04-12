@@ -1,4 +1,4 @@
-CXXFLAGS = -O3
+CXXFLAGS = -msse4 -O3 -g
 all:
 	@cd src && ${MAKE} CXXFLAGS="${CXXFLAGS}"
 

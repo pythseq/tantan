@@ -1,6 +1,7 @@
 // Copyright 2010 Martin C. Frith
 
 #include "tantan.hh"
+#include "mcf_simd.hh"
 
 #include <algorithm>  // fill, max
 #include <cassert>
@@ -13,6 +14,8 @@
 #define END(v) ((v).empty() ? 0 : &(v).back() + 1)
 
 namespace tantan {
+
+using namespace mcf;
 
 void multiplyAll(std::vector<double> &v, double factor) {
   for (std::vector<double>::iterator i = v.begin(); i < v.end(); ++i)
@@ -308,13 +311,33 @@ struct Tantan {
     }
 
     double b = backgroundProb;
-    double fromForeground = 0;
     const double *b2f = BEG(b2fProbs);
     double *fp = BEG(foregroundProbs);
     const double *lrRow = likelihoodRatioMatrix[*seqPtr];
     int maxOffset = maxOffsetInTheSequence();
 
-    for (int i = 0; i < maxOffset; ++i) {
+    SimdDbl bV = simdFillDbl(b);
+    SimdDbl tV = simdFillDbl(f2f0);
+    SimdDbl sV = simdZeroDbl();
+
+    int i = 0;
+    for (; i <= maxOffset - simdDblLen; i += simdDblLen) {
+      SimdDbl rV = simdSetDbl(
+#if defined __SSE4_1__ || defined __ARM_NEON
+#ifdef __AVX2__
+			      lrRow[seqPtr[-i-4]],
+			      lrRow[seqPtr[-i-3]],
+#endif
+			      lrRow[seqPtr[-i-2]],
+#endif
+			      lrRow[seqPtr[-i-1]]);
+      SimdDbl fV = simdLoadDbl(fp+i);
+      sV = simdAddDbl(sV, fV);
+      SimdDbl xV = simdMulDbl(bV, simdLoadDbl(b2f+i));
+      simdStoreDbl(fp+i, simdMulDbl(simdAddDbl(xV, simdMulDbl(fV, tV)), rV));
+    }
+    double fromForeground = simdHorizontalAddDbl(sV);
+    for (; i < maxOffset; ++i) {
       double f = fp[i];
       fromForeground += f;
       fp[i] = (b * b2f[i] + f * f2f0) * lrRow[seqPtr[-i-1]];
@@ -331,13 +354,32 @@ struct Tantan {
     }
 
     double toBackground = f2b * backgroundProb;
-    double toForeground = 0;
     const double *b2f = BEG(b2fProbs);
     double *fp = BEG(foregroundProbs);
     const double *lrRow = likelihoodRatioMatrix[*seqPtr];
     int maxOffset = maxOffsetInTheSequence();
 
-    for (int i = 0; i < maxOffset; ++i) {
+    SimdDbl bV = simdFillDbl(toBackground);
+    SimdDbl tV = simdFillDbl(f2f0);
+    SimdDbl sV = simdZeroDbl();
+
+    int i = 0;
+    for (; i <= maxOffset - simdDblLen; i += simdDblLen) {
+      SimdDbl rV = simdSetDbl(
+#if defined __SSE4_1__ || defined __ARM_NEON
+#ifdef __AVX2__
+			      lrRow[seqPtr[-i-4]],
+			      lrRow[seqPtr[-i-3]],
+#endif
+			      lrRow[seqPtr[-i-2]],
+#endif
+			      lrRow[seqPtr[-i-1]]);
+      SimdDbl fV = simdMulDbl(simdLoadDbl(fp+i), rV);
+      sV = simdAddDbl(sV, simdMulDbl(simdLoadDbl(b2f+i), fV));
+      simdStoreDbl(fp+i, simdAddDbl(bV, simdMulDbl(tV, fV)));
+    }
+    double toForeground = simdHorizontalAddDbl(sV);
+    for (; i < maxOffset; ++i) {
       double f = fp[i] * lrRow[seqPtr[-i-1]];
       toForeground += b2f[i] * f;
       fp[i] = toBackground + f2f0 * f;

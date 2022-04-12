@@ -1,4 +1,4 @@
-CXXFLAGS = -O3 -Wall
+CXXFLAGS = -msse4 -O3 -Wall -g
 
 all: tantan
 
