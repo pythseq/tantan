@@ -315,6 +315,7 @@ struct Tantan {
     double *fp = BEG(foregroundProbs);
     const double *lrRow = likelihoodRatioMatrix[*seqPtr];
     int maxOffset = maxOffsetInTheSequence();
+    const uchar *sp = seqPtr;
 
     SimdDbl bV = simdFillDbl(b);
     SimdDbl tV = simdFillDbl(f2f0);
@@ -325,12 +326,12 @@ struct Tantan {
       SimdDbl rV = simdSetDbl(
 #if defined __SSE4_1__ || defined __ARM_NEON
 #ifdef __AVX2__
-			      lrRow[seqPtr[-i-4]],
-			      lrRow[seqPtr[-i-3]],
+			      lrRow[sp[-i-4]],
+			      lrRow[sp[-i-3]],
 #endif
-			      lrRow[seqPtr[-i-2]],
+			      lrRow[sp[-i-2]],
 #endif
-			      lrRow[seqPtr[-i-1]]);
+			      lrRow[sp[-i-1]]);
       SimdDbl fV = simdLoadDbl(fp+i);
       sV = simdAddDbl(sV, fV);
       SimdDbl xV = simdMulDbl(bV, simdLoadDbl(b2f+i));
@@ -340,7 +341,7 @@ struct Tantan {
     for (; i < maxOffset; ++i) {
       double f = fp[i];
       fromForeground += f;
-      fp[i] = (b * b2f[i] + f * f2f0) * lrRow[seqPtr[-i-1]];
+      fp[i] = (b * b2f[i] + f * f2f0) * lrRow[sp[-i-1]];
     }
 
     backgroundProb = b * b2b + fromForeground * f2b;
@@ -358,6 +359,7 @@ struct Tantan {
     double *fp = BEG(foregroundProbs);
     const double *lrRow = likelihoodRatioMatrix[*seqPtr];
     int maxOffset = maxOffsetInTheSequence();
+    const uchar *sp = seqPtr;
 
     SimdDbl bV = simdFillDbl(toBackground);
     SimdDbl tV = simdFillDbl(f2f0);
@@ -368,19 +370,19 @@ struct Tantan {
       SimdDbl rV = simdSetDbl(
 #if defined __SSE4_1__ || defined __ARM_NEON
 #ifdef __AVX2__
-			      lrRow[seqPtr[-i-4]],
-			      lrRow[seqPtr[-i-3]],
+			      lrRow[sp[-i-4]],
+			      lrRow[sp[-i-3]],
 #endif
-			      lrRow[seqPtr[-i-2]],
+			      lrRow[sp[-i-2]],
 #endif
-			      lrRow[seqPtr[-i-1]]);
+			      lrRow[sp[-i-1]]);
       SimdDbl fV = simdMulDbl(simdLoadDbl(fp+i), rV);
       sV = simdAddDbl(sV, simdMulDbl(simdLoadDbl(b2f+i), fV));
       simdStoreDbl(fp+i, simdAddDbl(bV, simdMulDbl(tV, fV)));
     }
     double toForeground = simdHorizontalAddDbl(sV);
     for (; i < maxOffset; ++i) {
-      double f = fp[i] * lrRow[seqPtr[-i-1]];
+      double f = fp[i] * lrRow[sp[-i-1]];
       toForeground += b2f[i] * f;
       fp[i] = toBackground + f2f0 * f;
     }
