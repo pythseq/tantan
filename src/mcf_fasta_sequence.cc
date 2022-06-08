@@ -4,39 +4,38 @@
 
 #include <stddef.h>
 
-#include <cctype>  // isspace
 //#include <iostream>  // for debugging
 #include <istream>
-#include <iterator>  // istreambuf_iterator, ostreambuf_iterator
 #include <ostream>
+#include <streambuf>
 
 namespace mcf {
 
 static void readSequence(std::istream &s, std::vector<uchar> &sequence,
                          char delimiter) {
   if (!s) return;
-  std::istreambuf_iterator<char> inpos(s);
-  std::istreambuf_iterator<char> endpos;
-  while (inpos != endpos) {
-    char c = *inpos;
-    if (c == delimiter) break;
-    uchar u = static_cast<uchar>(c);
-    if (!std::isspace(u)) sequence.push_back(u);
-    ++inpos;
+  std::streambuf *b = s.rdbuf();
+  int c = b->sgetc();
+  while (c != std::streambuf::traits_type::eof()) {
+    if (c > ' ') {
+      if (c == delimiter) break;
+      sequence.push_back(c);
+    }
+    c = b->snextc();
   }
 }
 
 static void readQualityCodes(std::istream &s, std::vector<uchar> &qualityCodes,
                              std::vector<uchar>::size_type howMany) {
   if (!s) return;
-  std::istreambuf_iterator<char> inpos(s);
-  std::istreambuf_iterator<char> endpos;
-  while (inpos != endpos) {
-    if (qualityCodes.size() == howMany) break;
-    char c = *inpos;
-    uchar u = static_cast<uchar>(c);
-    if (!std::isspace(u)) qualityCodes.push_back(u);
-    ++inpos;
+  std::streambuf *b = s.rdbuf();
+  while (howMany > 0) {
+    int c = b->sbumpc();
+    if (c == std::streambuf::traits_type::eof()) break;  // xxx ???
+    if (c > ' ') {
+      qualityCodes.push_back(c);
+      --howMany;
+    }
   }
 }
 
