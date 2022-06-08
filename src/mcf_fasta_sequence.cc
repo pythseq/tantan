@@ -40,33 +40,27 @@ static void readQualityCodes(std::istream &s, std::vector<uchar> &qualityCodes,
 }
 
 std::istream &operator>>(std::istream &s, FastaSequence &f) {
-  std::string title;
-  std::vector<uchar> sequence;
-  std::string secondTitle;
-  std::vector<uchar> qualityCodes;
-
   char firstChar = '>';
   s >> firstChar;
   if (firstChar != '>' && firstChar != '@') s.setstate(std::ios::failbit);
-  getline(s, title);
-
-  if (firstChar == '>') {
-    readSequence(s, sequence, '>');
-  } else {
-    readSequence(s, sequence, '+');
-    char secondChar;
-    s >> secondChar;
-    getline(s, secondTitle);
-    readQualityCodes(s, qualityCodes, sequence.size());
-    // perhaps check whether we read enough quality codes
-  }
-
   if (!s) return s;
 
-  f.title.swap(title);
-  f.sequence.swap(sequence);
-  f.secondTitle.swap(secondTitle);
-  f.qualityCodes.swap(qualityCodes);
+  f.title.clear();
+  f.sequence.clear();
+  f.secondTitle.clear();
+  f.qualityCodes.clear();
+
+  getline(s, f.title);
+
+  if (firstChar == '>') {
+    readSequence(s, f.sequence, '>');
+  } else {
+    readSequence(s, f.sequence, '+');
+    s >> firstChar;
+    getline(s, f.secondTitle);
+    readQualityCodes(s, f.qualityCodes, f.sequence.size());
+    // perhaps check whether we read enough quality codes
+  }
 
   return s;
 }

@@ -342,15 +342,8 @@ void processOneSequence(FastaSequence &f, std::ostream &output) {
 
 void processOneFile(std::istream &input, std::ostream &output) {
   bool isFirstSequence = true;
-
-  // This code strives to minimize memory usage.  The sequence-reading
-  // operation does not overwrite the sequence until it finishes
-  // reading successfully.  So, we don't want to overwrite a large,
-  // old sequence.  Hence, we make a brand-new FastaSequence each time
-  // through the loop.
-  while (true) {
-    FastaSequence f;
-    if (!(input >> f)) break;
+  FastaSequence f;
+  while (input >> f) {
     if (isFirstSequence && !options.isProtein &&
         isDubiousDna(BEG(f.sequence), END(f.sequence)))
       std::cerr << "tantan: that's some funny-lookin DNA\n";
