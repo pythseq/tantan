@@ -2,6 +2,8 @@
 
 #include "mcf_fasta_sequence.hh"
 
+#include <stddef.h>
+
 #include <cctype>  // isspace
 //#include <iostream>  // for debugging
 #include <istream>
@@ -71,29 +73,20 @@ std::istream &operator>>(std::istream &s, FastaSequence &f) {
 }
 
 static void writeOneLine(std::ostream &s, const std::vector<uchar> &v) {
-  std::ostreambuf_iterator<char> o(s);
-  std::vector<uchar>::const_iterator b = v.begin();
-  std::vector<uchar>::const_iterator e = v.end();
-  while (b != e) {
-    o = static_cast<char>(*b);
-    ++b;
-  }
-  o = '\n';
+  std::streambuf *b = s.rdbuf();
+  size_t size = v.size();
+  if (size) b->sputn(reinterpret_cast<const char *>(&v[0]), size);
+  b->sputc('\n');
 }
 
 static void writeMultiLines(std::ostream &s, const std::vector<uchar> &v) {
-  const int lettersPerLine = 50;  // ?
-  std::ostreambuf_iterator<char> o(s);
-  std::vector<uchar>::const_iterator b = v.begin();
-  std::vector<uchar>::const_iterator e = v.end();
-  std::vector<uchar>::const_iterator i = b;
-  while (i != e) {
-    o = static_cast<char>(*i);
-    ++i;
-    if (i - b == lettersPerLine || i == e) {
-      o = '\n';
-      b = i;
-    }
+  size_t lettersPerLine = 50;  // ?
+  std::streambuf *b = s.rdbuf();
+  size_t size = v.size();
+  for (size_t i = 0; i < size; i += lettersPerLine) {
+    if (size - i < lettersPerLine) lettersPerLine = size - i;
+    b->sputn(reinterpret_cast<const char *>(&v[i]), lettersPerLine);
+    b->sputc('\n');
   }
 }
 
