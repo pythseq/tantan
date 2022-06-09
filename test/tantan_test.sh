@@ -35,5 +35,6 @@ countLowercaseLetters () {
     tantan -f4 -b12 hard.fa
     echo
     tantan -f4 -n1 hg19_chrM.fa
-} 2>&1 |
-diff -u tantan_test.out -
+    echo
+    tantan -f4 -b9999 panda.fastq
+} 2>&1 | diff -u tantan_test.out -
