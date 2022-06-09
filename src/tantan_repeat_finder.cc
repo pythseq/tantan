@@ -121,17 +121,14 @@ void RepeatFinder::calcBackwardTransitionScoresWithGaps() {
 }
 
 void RepeatFinder::calcBackwardTransitionScores() {
-  if (endGapScore > -HUGE_VAL) return calcBackwardTransitionScoresWithGaps();
-
   double toBackground = f2b + scoresPtr[0];
   double toForeground = -HUGE_VAL;
   double *foregroundPtr = scoresPtr + 1;
   double *foregroundEnd = foregroundPtr + maxRepeatOffset;
 
   while (foregroundPtr < foregroundEnd) {
-    toForeground += b2fGrowth;
     double f = *foregroundPtr;
-    toForeground = std::max(toForeground, f);
+    toForeground = std::max(toForeground + b2fGrowth, f);
     *foregroundPtr = std::max(toBackground, f2f0 + f);
     ++foregroundPtr;
   }
@@ -156,6 +153,17 @@ void RepeatFinder::calcEmissionScores() {
   }
 
   std::copy(oldScores + i, scoresPtr, scoresPtr + i);
+}
+
+void RepeatFinder::calcScoresForOneSequencePosition() {
+  if (endGapScore > -HUGE_VAL) {
+    calcEmissionScores();
+    calcBackwardTransitionScoresWithGaps();
+    return;
+  }
+
+  calcEmissionScores();
+  calcBackwardTransitionScores();
 }
 
 void RepeatFinder::makeCheckpoint() {

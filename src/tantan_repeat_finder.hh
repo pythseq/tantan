@@ -71,6 +71,7 @@ private:
   void calcBackwardTransitionScoresWithGaps();
   void calcBackwardTransitionScores();
   void calcEmissionScores();
+  void calcScoresForOneSequencePosition();
   void makeCheckpoint();
   void redoCheckpoint();
   int offsetWithMaxScore() const;
@@ -86,11 +87,6 @@ private:
 
   double scoreWithEmission(const double *matrixRow, int offset) const {
     return scoresPtr[offset] + matrixRow[seqPtr[-offset]];
-  }
-
-  void calcScoresForOneSequencePosition() {
-    calcEmissionScores();
-    calcBackwardTransitionScores();
   }
 };
 
