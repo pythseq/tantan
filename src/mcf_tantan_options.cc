@@ -82,7 +82,7 @@ Options (default settings):\n\
  -j  mismatch cost (BLOSUM62 if -p, else 7 if -f4, else 1)\n\
  -a  gap existence cost ("
       + stringify(gapExistenceCost) + ")\n\
- -b  gap extension cost (7 if -f4, else infinity)\n\
+ -b  gap extension cost, 0=gapless (7 if -f4, else 0)\n\
  -s  minimum repeat probability for masking ("
       + stringify(minMaskProb) + ")\n\
  -n  minimum copy number, affects -f4 only ("
@@ -152,7 +152,7 @@ Options (default settings):\n\
         break;
       case 'b':
         unstringify(gapExtensionCost, optarg);
-        if (gapExtensionCost <= 0)
+        if (gapExtensionCost < 0)
           badopt(c, optarg);
         break;
       case 's':

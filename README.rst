@@ -145,7 +145,7 @@ Options
 -i  match score
 -j  mismatch cost
 -a  gap existence cost
--b  gap extension cost
+-b  gap extension cost (as a special case, 0 means no gaps)
 -s  minimum repeat probability for masking
 -n  minimum copy number, affects -f4 only
 -f  output type: 0=masked sequence, 1=repeat probabilities,
