@@ -143,7 +143,7 @@ Options
 -w  maximum tandem repeat period to consider
 -d  probability decay per period (period-(i+1) / period-i)
 -i  match score
--j  mismatch cost
+-j  mismatch cost (as a special case, 0 means no mismatches)
 -a  gap existence cost
 -b  gap extension cost (as a special case, 0 means no gaps)
 -s  minimum repeat probability for masking
@@ -194,6 +194,16 @@ units.  Column 6 shows the repeating unit (which again might vary, so
 this is just a representative).  Column 7 shows the whole repeat:
 lowercase letters are insertions relative to the previous repeat unit,
 and dashes are deletions relative to the previous repeat unit.
+
+You can forbid insertions and deletions (which is faster) with
+``-b0``::
+
+  tantan -f4 -b0 seqs.fa
+
+You can also forbid mismatches with ``-j0``, so this gets exact
+repeats only::
+
+  tantan -f4 -b0 -j0 seqs.fa
 
 Miscellaneous
 -------------

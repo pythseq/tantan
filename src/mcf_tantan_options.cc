@@ -6,6 +6,8 @@
 
 #include <unistd.h>
 
+#include <limits.h>
+
 #include <cstdlib>  // EXIT_SUCCESS
 #include <iostream>
 #include <stdexcept>
@@ -53,7 +55,7 @@ TantanOptions::TantanOptions() :
     maxCycleLength(-1),  // depends on isProtein
     repeatOffsetProbDecay(0.9),
     matchScore(0),
-    mismatchCost(0),
+    mismatchCost(-1),
     gapExistenceCost(0),
     gapExtensionCost(-1),  // means: no gaps
     minMaskProb(0.5),
@@ -79,10 +81,10 @@ Options (default settings):\n\
  -d  probability decay per period ("
       + stringify(repeatOffsetProbDecay) + ")\n\
  -i  match score (BLOSUM62 if -p, else 2 if -f4, else 1)\n\
- -j  mismatch cost (BLOSUM62 if -p, else 7 if -f4, else 1)\n\
+ -j  mismatch cost, 0 means infinite (BLOSUM62 if -p, else 7 if -f4, else 1)\n\
  -a  gap existence cost ("
       + stringify(gapExistenceCost) + ")\n\
- -b  gap extension cost, 0=gapless (7 if -f4, else 0)\n\
+ -b  gap extension cost, 0 means no gaps (7 if -f4, else 0)\n\
  -s  minimum repeat probability for masking ("
       + stringify(minMaskProb) + ")\n\
  -n  minimum copy number, affects -f4 only ("
@@ -144,7 +146,7 @@ Options (default settings):\n\
 	break;
       case 'j':
 	unstringify(mismatchCost, optarg);
-	if (mismatchCost <= 0)
+	if (mismatchCost < 0)
 	  badopt(c, optarg);
 	break;
       case 'a':
@@ -179,9 +181,11 @@ Options (default settings):\n\
 
   if (maxCycleLength < 0) maxCycleLength = (isProtein ? 50 : 100);
 
-  if (!isProtein || matchScore || mismatchCost) {
-    if (matchScore   == 0) matchScore   = (outputType == repOut ? 2 : 1);
-    if (mismatchCost == 0) mismatchCost = (outputType == repOut ? 7 : 1);
+  if (mismatchCost == 0) mismatchCost = INT_MAX;
+
+  if (!isProtein || matchScore > 0 || mismatchCost > 0) {
+    if (matchScore   < 1) matchScore   = (outputType == repOut ? 2 : 1);
+    if (mismatchCost < 1) mismatchCost = (outputType == repOut ? 7 : 1);
   }
 
   indexOfFirstNonOptionArgument = optind;

@@ -78,7 +78,7 @@ void initScoresAndProbabilities() {
   if (options.scoreMatrixFileName) {
     unfilify(scoreMatrix, options.scoreMatrixFileName);
   } else if (options.isProtein) {
-    if (options.matchScore && options.mismatchCost) {
+    if (options.matchScore > 0 && options.mismatchCost > 0) {
       scoreMatrix.initMatchMismatch(options.matchScore, options.mismatchCost,
 				    Alphabet::protein);
     } else {
