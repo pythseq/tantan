@@ -120,22 +120,6 @@ void RepeatFinder::calcBackwardTransitionScoresWithGaps() {
   scoresPtr[0] = std::max(b2b + scoresPtr[0], b2fLast + toForeground);
 }
 
-void RepeatFinder::calcBackwardTransitionScores() {
-  double toBackground = f2b + scoresPtr[0];
-  double toForeground = -HUGE_VAL;
-  double *foregroundPtr = scoresPtr + 1;
-  double *foregroundEnd = foregroundPtr + maxRepeatOffset;
-
-  while (foregroundPtr < foregroundEnd) {
-    double f = *foregroundPtr;
-    toForeground = std::max(toForeground + b2fGrowth, f);
-    *foregroundPtr = std::max(toBackground, f2f0 + f);
-    ++foregroundPtr;
-  }
-
-  scoresPtr[0] = std::max(b2b + scoresPtr[0], b2fLast + toForeground);
-}
-
 void RepeatFinder::calcEmissionScores() {
   const double *matrixRow = substitutionMatrix[*seqPtr];
   double *oldScores = scoresPtr - dpScoresPerLetter;
@@ -162,8 +146,27 @@ void RepeatFinder::calcScoresForOneSequencePosition() {
     return;
   }
 
-  calcEmissionScores();
-  calcBackwardTransitionScores();
+  double *oldScores = scoresPtr - dpScoresPerLetter;
+  double toBackground = f2b + oldScores[0];
+  const double *matrixRow = substitutionMatrix[*seqPtr];
+  int maxOffset = maxOffsetInTheSequence();
+  double toForeground = -HUGE_VAL;
+  int i = 1;
+
+  for (; i <= maxOffset; ++i) {
+    double f = oldScores[i] + matrixRow[seqPtr[-i]];
+    toForeground = std::max(toForeground + b2fGrowth, f);
+    scoresPtr[i] = std::max(toBackground, f2f0 + f);
+  }
+
+  for (; i <= maxRepeatOffset; ++i) {
+    toForeground += b2fGrowth;
+    scoresPtr[i] = toBackground;
+  }
+
+  std::copy(oldScores + i, scoresPtr, scoresPtr + i);
+
+  scoresPtr[0] = std::max(b2b + oldScores[0], b2fLast + toForeground);
 }
 
 void RepeatFinder::makeCheckpoint() {

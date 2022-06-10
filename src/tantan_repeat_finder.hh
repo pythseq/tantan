@@ -69,7 +69,6 @@ private:
 
   void initializeBackwardScores();
   void calcBackwardTransitionScoresWithGaps();
-  void calcBackwardTransitionScores();
   void calcEmissionScores();
   void calcScoresForOneSequencePosition();
   void makeCheckpoint();
