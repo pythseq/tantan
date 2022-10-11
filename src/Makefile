@@ -4,7 +4,7 @@ all: ../bin/tantan
 
 ../bin/tantan: *.cc *.hh version.hh Makefile
 	mkdir -p ../bin
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@ *.cc
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@ *.cc -lz
 
 clean:
 	rm -f ../bin/tantan

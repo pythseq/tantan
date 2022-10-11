@@ -3,6 +3,8 @@
 #ifndef MCF_UTIL_HH
 #define MCF_UTIL_HH
 
+#include "mcf_zstream.hh"
+
 #include <cassert>
 #include <fstream>
 #include <sstream>
@@ -12,7 +14,7 @@
 namespace mcf {
 
 // open an input file, but if the name is "-", just return cin
-std::istream &openIn(const std::string &fileName, std::ifstream &ifs);
+std::istream &openIn(const std::string &fileName, izstream &z);
 
 // open an output file, but if the name is "-", just return cout
 std::ostream &openOut(const std::string &fileName, std::ofstream &ofs);
@@ -34,8 +36,8 @@ void unstringify(T& x, const std::string &s) {
 
 template <typename T>
 void unfilify(T& x, const std::string &fileName) {
-  std::ifstream ifs;
-  std::istream &input = openIn(fileName, ifs);
+  izstream z;
+  std::istream &input = openIn(fileName, z);
   input >> x;
   if (!input) throw std::runtime_error("can't read file: " + fileName);
   // check for junk at end of file?

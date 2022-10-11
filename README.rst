@@ -26,14 +26,15 @@ set up your computer to find it automatically.  Some possible ways:
 * Copy ``tantan`` to a standard directory: ``sudo make install``
   (using "sudo" to request administrator permissions).
 
-* Copy it to your personal bin directory: ``make install prefix=~``
+* Copy it to your personal bin directory: ``make install prefix=~`` or
+  ``make install prefix=~/.local``
 
 * Adjust your `PATH variable`_.
 
 You might need to log out and back in for your computer to recognize
 the new program.
 
-**Alternative:** Install tantan from bioconda_.
+**Alternative:** Install tantan from bioconda_ or `Debian Med`_.
 
 Normal usage
 ------------
@@ -219,3 +220,4 @@ sequences", MC Frith, Nucleic Acids Research 2011 39(4):e23.
 .. _BED: https://genome.ucsc.edu/FAQ/FAQformat.html#format1
 .. _PATH variable: https://en.wikipedia.org/wiki/PATH_(variable)
 .. _bioconda: https://bioconda.github.io/
+.. _Debian Med: https://www.debian.org/devel/debian-med/

@@ -416,8 +416,8 @@ try {
     processOneFile(std::cin, output);
 
   for (int i = options.indexOfFirstNonOptionArgument; i < argc; ++i) {
-    std::ifstream ifs;
-    std::istream &input = openIn(argv[i], ifs);
+    izstream z;
+    std::istream &input = openIn(argv[i], z);
     processOneFile(input, output);
   }
 
